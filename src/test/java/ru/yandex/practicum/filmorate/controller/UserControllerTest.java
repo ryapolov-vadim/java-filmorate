@@ -2,8 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.List;
 
@@ -16,7 +19,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new UserController();
+        controller = new UserController(new UserService(new InMemoryUserStorage()));
         user = new User();
     }
 
@@ -109,7 +112,7 @@ class UserControllerTest {
         user.setId(999L);
 
         // Исполнение
-        assertThrows(ValidationException.class,
+        assertThrows(NotFoundException.class,
                 () -> controller.update(user),
                 "Ожидалось исключение при обновлении несуществующего пользователя");
     }

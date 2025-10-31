@@ -30,5 +30,20 @@ public class Film {
     @Positive(message = "продолжительность фильма должна быть положительным числом")
     private Integer duration;
 
-    private Set<Long> likes  = new HashSet<>();
+    private Set<Long> likes = new HashSet<>();
+    private Set<Genre> genres = new HashSet<>();
+    private MpaRating mpa;
+
+    public Film(long id, String name, String description, LocalDate releaseDate, int duration, MpaRating mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+    }
+
+    public void addGenre(Genre genre) {
+        genres.add(genre);
+    }
 }

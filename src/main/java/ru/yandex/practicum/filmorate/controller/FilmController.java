@@ -29,6 +29,12 @@ public class FilmController {
         return filmList;
     }
 
+    @GetMapping("/{filmId}")
+    public Film getFilmById(@PathVariable long filmId) {
+        log.info("Получаем фильм с id {}", filmId);
+        return filmService.getFilmById(filmId);
+    }
+
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.info("Получен Http-запрос на создание фильма {}", film);
@@ -45,22 +51,20 @@ public class FilmController {
         return result;
     }
 
-    @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен Http-запрос на добавление лайка фильму с ID: {}, от пользователя с ID: {}", id, userId);
-        Film result = filmService.addLike(id, userId);
+    @PutMapping("/{filmId}/like/{userId}")
+    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        log.info("Получен Http-запрос на добавление лайка фильму с ID: {}, от пользователя с ID: {}", filmId, userId);
+        filmService.addLike(filmId, userId);
         log.info("Успешно обработан Http-запрос на добавление лайка фильму. Фильм ID: {}, пользователя ID: {}",
-                id, userId);
-        return result;
+                filmId, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
-    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен Http-запрос на удаление лайка у фильма с ID: {}, от пользователя с ID: {}", id, userId);
-        Film result = filmService.removeLike(id, userId);
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        log.info("Получен Http-запрос на удаление лайка у фильма с ID: {}, от пользователя с ID: {}", filmId, userId);
+        filmService.removeLike(filmId, userId);
         log.info("Успешно обработан Http-запрос на удаление лайка у фильма. Фильм ID: {}, пользователя ID: {}",
-                id, userId);
-        return result;
+                filmId, userId);
     }
 
     @GetMapping("/popular")

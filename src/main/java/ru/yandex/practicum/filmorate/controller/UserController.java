@@ -28,6 +28,12 @@ public class UserController {
         return users;
     }
 
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable Long userId) {
+        log.info("Получаем юзера с id {}", userId);
+        return userService.getUserById(userId);
+    }
+
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Получен Http-запрос на создание пользователя {}", user);
@@ -45,21 +51,19 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Получен Http-запрос на добавление пользователя с ID: {}  в друзья к пользователю с ID: {} ",
                 id, friendId);
-        User result = userService.addFriend(id, friendId);
+        userService.addFriend(id, friendId);
         log.info("Успешно обработан Http-запрос на добавление пользователя с ID: {}  в друзья к пользователю с ID: {} ",
                 id, friendId);
-        return result;
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Получен Http-запрос на удаление пользователя с ID: {} из друзей с ID: {} ", friendId, id);
-        User result = userService.removeFriend(id, friendId);
+        userService.removeFriend(id, friendId);
         log.info("Успешно обработан Http-запрос на удаление пользователя с ID: {} из друзей с ID: {} ", friendId, id);
-        return result;
     }
 
     @GetMapping("/{id}/friends")

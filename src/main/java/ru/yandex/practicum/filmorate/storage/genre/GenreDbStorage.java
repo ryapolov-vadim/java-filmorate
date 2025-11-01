@@ -39,11 +39,11 @@ public class GenreDbStorage extends BaseStorage<Genre> implements GenreStorage {
     @Override
     public List<Genre> getByFilmId(long id) {
         String sql = """
-                    SELECT g.genre_id, g.genre_name
-                    FROM film_genres fg
-                    JOIN genres g ON fg.genre_id = g.genre_id
-                    WHERE fg.film_id = ?
-                    ORDER BY g.genre_id
+                SELECT g.genre_id, g.genre_name 
+                FROM film_genres fg
+                JOIN genres g ON fg.genre_id = g.genre_id
+                WHERE fg.film_id = ?
+                ORDER BY g.genre_id
                 """;
         return findMany(sql, new GenreRowMapper(), id);
     }

@@ -11,9 +11,9 @@ import java.sql.SQLException;
 public class MpaRatingRowMapper implements RowMapper<MpaRating> {
     @Override
     public MpaRating mapRow(ResultSet rs, int rowNum) throws SQLException {
-        MpaRating mpaRating = new MpaRating();
-        mpaRating.setId(rs.getInt("mpa_rating_id"));
-        mpaRating.setName(rs.getString("mpa_rating_name"));
-        return mpaRating;
+        MpaRating rating = new MpaRating();
+        rating.setId(rs.getInt("mpa_rating_id"));
+        rating.setName(rs.getString("mpa_rating_name"));
+        return rating;
     }
 }

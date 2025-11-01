@@ -12,26 +12,25 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingDbStorage;
 
 import java.util.List;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({MpaRatingDbStorage.class, MpaRatingRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class MpaRatingDbStorageTests {
+
     private final MpaRatingDbStorage storage;
 
     @Test
-    void testGetById() {
+    void fetchRatingById() {
         MpaRating rating = storage.getById(1);
         assertEquals(1, rating.getId());
         assertNotNull(rating.getName());
     }
 
     @Test
-    void testGetAll() {
+    void fetchAllRatings() {
         List<MpaRating> ratings = storage.getAll();
         assertFalse(ratings.isEmpty());
     }

@@ -37,9 +37,12 @@ public class MpaRatingDbStorage extends BaseStorage<MpaRating> implements MpaRat
 
     @Override
     public MpaRating getByFilmId(long filmId) {
-        String sql = "SELECT m.* FROM films f " +
-                "JOIN mpa_ratings m ON f.mpa_rating_id = m.mpa_rating_id " +
-                "WHERE f.film_id = ?";
+        String sql = """
+                SELECT m.* 
+                FROM films f
+                JOIN mpa_ratings m ON f.mpa_rating_id = m.mpa_rating_id
+                WHERE f.film_id = ?
+                """;
         MpaRating rating = findOne(sql, mapper, filmId);
         if (rating == null) {
             throw new NotFoundException("Рейтинг для фильма с id: " + filmId + " не найден");

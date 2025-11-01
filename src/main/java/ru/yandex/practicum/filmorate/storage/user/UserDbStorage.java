@@ -21,7 +21,6 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     private final UserRowMapper userRowMapper;
 
-
     public UserDbStorage(JdbcTemplate jdbc, UserRowMapper userRowMapper) {
         super(jdbc);
         this.userRowMapper = userRowMapper;
@@ -30,32 +29,35 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     @Override
     public User create(User user) {
         String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        KeyHolder kh = new GeneratedKeyHolder();
+
+        jdbc.update(conn -> {
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
             ps.setString(3, user.getName() == null ? user.getLogin() : user.getName());
             ps.setDate(4, java.sql.Date.valueOf(user.getBirthday()));
             return ps;
-        }, keyHolder);
+        }, kh);
 
-        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        Number key = kh.getKey();
+        user.setId(Objects.requireNonNull(key).longValue());
         return user;
     }
 
     @Override
     public User update(User user) {
         String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?";
-        int updated = jdbc.update(
-                sql,
+        int affected = jdbc.update(sql,
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
-                user.getBirthday(),
+                java.sql.Date.valueOf(user.getBirthday()),
                 user.getId()
         );
-        if (updated == 0) throw new NotFoundException("Пользователь не найден");
+        if (affected == 0) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         return user;
     }
 

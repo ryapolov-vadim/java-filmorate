@@ -7,62 +7,72 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.filmorate.mappers.*;
+import ru.yandex.practicum.filmorate.mappers.FilmRowMapper;
+import ru.yandex.practicum.filmorate.mappers.GenreRowMapper;
+import ru.yandex.practicum.filmorate.mappers.MpaRatingRowMapper;
+import ru.yandex.practicum.filmorate.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikesFilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({FilmDbStorage.class, FilmRowMapper.class, GenreDbStorage.class, GenreRowMapper.class,
-        MpaRatingDbStorage.class, MpaRatingRowMapper.class, LikesFilmDbStorage.class,
-        UserRowMapper.class, FriendsDbStorage.class})
+@Import({FilmDbStorage.class, FilmRowMapper.class,
+        GenreDbStorage.class, GenreRowMapper.class,
+        MpaRatingDbStorage.class, MpaRatingRowMapper.class,
+        LikesFilmDbStorage.class,
+        UserDbStorage.class, UserRowMapper.class,
+        FriendsDbStorage.class})
 public class FilmDbStorageTests {
-
     private final FilmDbStorage filmDbStorage;
-    private Film testFilm;
+
+    private Film film;
 
     @BeforeEach
-    void init() {
-        testFilm = new Film(0, "My Test Film", "A description for test", LocalDate.of(2000, 1, 1), 120, new MpaRating(1));
-        testFilm.addGenre(new Genre(1, "Комедия"));
+    void setup() {
+        film = new Film(0, "Test Film", "Test description",
+                LocalDate.of(2000, 1, 1), 120, new MpaRating(1));
+        film.addGenre(new Genre(1, "Комедия"));
     }
 
     @Test
-    void createAndFetchFilm() {
-        Film saved = filmDbStorage.create(testFilm);
-        assertNotNull(saved);
-        assertTrue(saved.getId() > 0);
+    void testCreateAndGetById() {
+        Film created = filmDbStorage.create(film);
+        assertNotNull(created);
+        assertTrue(created.getId() > 0);
 
-        Film fetched = filmDbStorage.getById(saved.getId());
-        assertEquals(testFilm.getName(), fetched.getName());
-        assertEquals(testFilm.getDescription(), fetched.getDescription());
-        assertEquals(testFilm.getDuration(), fetched.getDuration());
-        assertEquals(testFilm.getReleaseDate(), fetched.getReleaseDate());
-        assertEquals(testFilm.getMpa().getId(), fetched.getMpa().getId());
-        assertTrue(fetched.getGenres().containsAll(testFilm.getGenres()));
+        Film result = filmDbStorage.getById(created.getId());
+        assertEquals(film.getName(), result.getName());
+        assertEquals(film.getDescription(), result.getDescription());
+        assertEquals(film.getDuration(), result.getDuration());
+        assertEquals(film.getReleaseDate(), result.getReleaseDate());
+        assertEquals(film.getMpa().getId(), result.getMpa().getId());
+        assertTrue(result.getGenres().containsAll(film.getGenres()));
     }
 
     @Test
-    void updateExistingFilm() {
-        Film saved = filmDbStorage.create(testFilm);
-        saved.setName("Updated Film");
-        saved.setDescription("Updated description");
-        saved.setDuration(90);
-        saved.setReleaseDate(LocalDate.of(2010, 10, 10));
-        saved.setMpa(new MpaRating(2));
-        saved.setGenres(Set.of(new Genre(2, "Драма")));
+    void testUpdateFilm() {
+        Film created = filmDbStorage.create(film);
+        created.setName("Updated name");
+        created.setDescription("Updated description");
+        created.setDuration(90);
+        created.setReleaseDate(LocalDate.of(2010, 10, 10));
+        created.setMpa(new MpaRating(2));
+        created.setGenres(Set.of(new Genre(2, "Драма")));
 
-        Film updated = filmDbStorage.update(saved);
-        assertEquals("Updated Film", updated.getName());
+        Film updated = filmDbStorage.update(created);
+        assertEquals("Updated name", updated.getName());
         assertEquals("Updated description", updated.getDescription());
         assertEquals(90, updated.getDuration());
         assertEquals(LocalDate.of(2010, 10, 10), updated.getReleaseDate());
@@ -71,11 +81,12 @@ public class FilmDbStorageTests {
     }
 
     @Test
-    void fetchAllFilms() {
-        filmDbStorage.create(testFilm);
-        Film another = new Film(0, "Film 2", "Another description", LocalDate.of(2001, 2, 2), 100, new MpaRating(1));
-        another.addGenre(new Genre(1, "Комедия"));
-        filmDbStorage.create(another);
+    void testGetAllFilms() {
+        filmDbStorage.create(film);
+        Film film2 = new Film(0, "Film 2", "Another description",
+                LocalDate.of(2001, 2, 2), 100, new MpaRating(1));
+        film2.addGenre(new Genre(1, "Комедия"));
+        filmDbStorage.create(film2);
 
         List<Film> films = filmDbStorage.getAll();
         assertTrue(films.size() >= 2);

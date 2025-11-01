@@ -23,66 +23,73 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({UserDbStorage.class, UserRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserDbStorageTests {
-
     private final UserDbStorage userStorage;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private User testUser;
+    private User user;
 
     @BeforeEach
-    void initUser() {
-        testUser = new User();
-        testUser.setEmail("example@domain.com");
-        testUser.setLogin("exampleLogin");
-        testUser.setName("Example Name");
-        testUser.setBirthday(LocalDate.of(1990, 1, 1));
+    void setup() {
+        user = new User();
+        user.setEmail("user@example.com");
+        user.setLogin("userLogin");
+        user.setName("User Name");
+        user.setBirthday(LocalDate.of(1990, 1, 1));
     }
 
     @AfterEach
-    void cleanupDb() {
+    void clear() {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+
         jdbcTemplate.update("TRUNCATE TABLE film_likes");
         jdbcTemplate.update("TRUNCATE TABLE friends");
         jdbcTemplate.update("TRUNCATE TABLE film_genres");
         jdbcTemplate.update("TRUNCATE TABLE films");
         jdbcTemplate.update("TRUNCATE TABLE users");
+
+        // genres и mpa_ratings — справочники, их не трогаем
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+
+        // при желании можно сбросить sequence для user_id
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1");
     }
 
+
     @Test
-    void createUserTest() {
-        User created = userStorage.create(testUser);
+    void testCreateUser() {
+        User created = userStorage.create(user);
         assertNotNull(created.getId());
-        assertEquals(testUser.getEmail(), created.getEmail());
-        assertEquals(testUser.getLogin(), created.getLogin());
-        assertEquals(testUser.getName(), created.getName());
-        assertEquals(testUser.getBirthday(), created.getBirthday());
+        assertEquals(user.getEmail(), created.getEmail());
+        assertEquals(user.getLogin(), created.getLogin());
+        assertEquals(user.getName(), created.getName());
+        assertEquals(user.getBirthday(), created.getBirthday());
     }
 
     @Test
-    void updateUserTest() {
-        User created = userStorage.create(testUser);
+    void testUpdateUser() {
+        User created = userStorage.create(user);
         created.setName("Updated Name");
-        created.setLogin("UpdatedLogin");
+        created.setLogin("updatedLogin");
+
         User updated = userStorage.update(created);
         assertEquals("Updated Name", updated.getName());
-        assertEquals("UpdatedLogin", updated.getLogin());
+        assertEquals("updatedLogin", updated.getLogin());
     }
 
     @Test
-    void fetchAllUsersTest() {
-        userStorage.create(testUser);
-        User another = new User();
-        another.setEmail("other@domain.com");
-        another.setLogin("otherLogin");
-        another.setName("Other User");
-        another.setBirthday(LocalDate.of(1985, 5, 5));
-        userStorage.create(another);
+    void testGetAllUsers() {
+        userStorage.create(user);
+        User anotherUser = new User();
+        anotherUser.setEmail("other@example.com");
+        anotherUser.setLogin("otherLogin");
+        anotherUser.setName("Other User");
+        anotherUser.setBirthday(LocalDate.of(1985, 5, 5));
+        userStorage.create(anotherUser);
 
-        List<User> allUsers = userStorage.getAll();
-        assertTrue(allUsers.size() >= 2);
+        List<User> users = userStorage.getAll();
+        assertTrue(users.size() >= 2);
     }
 }
